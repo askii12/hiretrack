@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { getMe } from "../services/authService";
 
 export default function DashboardPage() {
@@ -40,6 +40,7 @@ export default function DashboardPage() {
     <div>
       <h1>Dashboard</h1>
       {user && <p>Welcome, {user.name}</p>}
+      <Link to="/applications">Go to applications</Link>
       {error && <p>{error}</p>}
       <button onClick={handleLogout}>Logout</button>
     </div>
