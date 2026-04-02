@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String           @id @default(uuid())
+  name         String
+  email        String           @unique
+  password     String
+  applications JobApplication[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model JobApplication {
+  id            String   @id @default(uuid())
+  companyName   String
+  positionTitle String
+  status        String   @default("Wishlist")
+  location      String?
+  salaryMin     Int?
+  salaryMax     Int?
+  jobLink       String?
+  notes         String?  @db.Text
+  priority      String   @default("Medium")
+  appliedDate   DateTime?
+  nextStepDate  DateTime?
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { register } from "../services/authService";
+import { login } from "../services/authService";
 
-export default function RegisterPage() {
+export default function LoginPage() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
     password: "",
   });
@@ -25,29 +24,20 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      const data = await register(formData);
+      const data = await login(formData);
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
       navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
+      setError(err.response?.data?.message || "Login failed");
     }
   };
 
   return (
     <div>
-      <h1>Register</h1>
+      <h1>Login</h1>
 
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={formData.name}
-          onChange={handleChange}
-        />
-        <br />
-
         <input
           type="email"
           name="email"
@@ -66,13 +56,13 @@ export default function RegisterPage() {
         />
         <br />
 
-        <button type="submit">Create account</button>
+        <button type="submit">Login</button>
       </form>
 
       {error && <p>{error}</p>}
 
       <p>
-        Already have an account? <Link to="/login">Login</Link>
+        Don’t have an account? <Link to="/register">Register</Link>
       </p>
     </div>
   );
