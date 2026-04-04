@@ -50,12 +50,50 @@ export const createApplication = async (req, res) => {
 
 export const getApplications = async (req, res) => {
   try {
+    const { status, priority, search, sortBy, order } = req.query;
+
+    const where = {
+      userId: req.user.id,
+    };
+
+    if (status && status !== "All") {
+      where.status = status;
+    }
+
+    if (priority && priority !== "All") {
+      where.priority = priority;
+    }
+
+    if (search) {
+      where.OR = [
+        {
+          companyName: {
+            contains: search,
+          },
+        },
+        {
+          positionTitle: {
+            contains: search,
+          },
+        },
+      ];
+    }
+
+    const allowedSortFields = [
+      "createdAt",
+      "appliedDate",
+      "nextStepDate",
+      "companyName",
+    ];
+    const finalSortBy = allowedSortFields.includes(sortBy)
+      ? sortBy
+      : "createdAt";
+    const finalOrder = order === "asc" ? "asc" : "desc";
+
     const applications = await prisma.jobApplication.findMany({
-      where: {
-        userId: req.user.id,
-      },
+      where,
       orderBy: {
-        createdAt: "desc",
+        [finalSortBy]: finalOrder,
       },
     });
 
@@ -170,5 +208,56 @@ export const deleteApplication = async (req, res) => {
     res
       .status(500)
       .json({ message: "Server error while deleting application" });
+  }
+};
+
+export const getApplicationStats = async (req, res) => {
+  try {
+    const applications = await prisma.jobApplication.findMany({
+      where: {
+        userId: req.user.id,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    const totalApplications = applications.length;
+
+    const statusCounts = {
+      Wishlist: 0,
+      Applied: 0,
+      "HR Interview": 0,
+      "Technical Interview": 0,
+      "Test Task": 0,
+      "Final Interview": 0,
+      Offer: 0,
+      Rejected: 0,
+    };
+
+    for (const application of applications) {
+      if (statusCounts[application.status] !== undefined) {
+        statusCounts[application.status] += 1;
+      }
+    }
+
+    const now = new Date();
+
+    const upcomingNextSteps = applications
+      .filter((app) => app.nextStepDate && new Date(app.nextStepDate) >= now)
+      .sort((a, b) => new Date(a.nextStepDate) - new Date(b.nextStepDate))
+      .slice(0, 5);
+
+    const recentApplications = applications.slice(0, 5);
+
+    res.status(200).json({
+      totalApplications,
+      statusCounts,
+      upcomingNextSteps,
+      recentApplications,
+    });
+  } catch (error) {
+    console.error("Get application stats error:", error);
+    res.status(500).json({ message: "Server error while fetching stats" });
   }
 };

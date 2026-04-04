@@ -12,8 +12,24 @@ const getAuthConfig = () => {
   };
 };
 
-export const getApplications = async () => {
-  const response = await axios.get(API_URL, getAuthConfig());
+export const getApplications = async (filters = {}) => {
+  const params = new URLSearchParams();
+
+  if (filters.status) params.append("status", filters.status);
+  if (filters.priority) params.append("priority", filters.priority);
+  if (filters.search) params.append("search", filters.search);
+  if (filters.sortBy) params.append("sortBy", filters.sortBy);
+  if (filters.order) params.append("order", filters.order);
+
+  const queryString = params.toString();
+  const url = queryString ? `${API_URL}?${queryString}` : API_URL;
+
+  const response = await axios.get(url, getAuthConfig());
+  return response.data;
+};
+
+export const getApplicationStats = async () => {
+  const response = await axios.get(`${API_URL}/stats`, getAuthConfig());
   return response.data;
 };
 

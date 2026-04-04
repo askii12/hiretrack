@@ -6,11 +6,14 @@ import {
   getApplicationById,
   updateApplication,
   deleteApplication,
+  getApplicationStats,
 } from "../controllers/applicationController.js";
 
 const router = express.Router();
 
 router.use(protect);
+
+router.get("/stats", getApplicationStats);
 
 router.route("/").post(createApplication).get(getApplications);
 router

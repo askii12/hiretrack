@@ -21,16 +21,25 @@ const initialForm = {
   nextStepDate: "",
 };
 
+const initialFilters = {
+  status: "",
+  priority: "",
+  search: "",
+  sortBy: "createdAt",
+  order: "desc",
+};
+
 export default function ApplicationsPage() {
   const navigate = useNavigate();
   const [applications, setApplications] = useState([]);
   const [formData, setFormData] = useState(initialForm);
+  const [filters, setFilters] = useState(initialFilters);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
 
-  const loadApplications = async () => {
+  const loadApplications = async (activeFilters = filters) => {
     try {
-      const data = await getApplications();
+      const data = await getApplications(activeFilters);
       setApplications(data);
     } catch (err) {
       localStorage.removeItem("token");
@@ -47,7 +56,7 @@ export default function ApplicationsPage() {
       return;
     }
 
-    loadApplications();
+    loadApplications(filters);
   }, [navigate]);
 
   const handleChange = (e) => {
@@ -55,6 +64,16 @@ export default function ApplicationsPage() {
       ...prev,
       [e.target.name]: e.target.value,
     }));
+  };
+
+  const handleFilterChange = (e) => {
+    const updatedFilters = {
+      ...filters,
+      [e.target.name]: e.target.value,
+    };
+
+    setFilters(updatedFilters);
+    loadApplications(updatedFilters);
   };
 
   const handleEdit = (application) => {
@@ -85,7 +104,7 @@ export default function ApplicationsPage() {
         setEditingId(null);
         setFormData(initialForm);
       }
-      loadApplications();
+      loadApplications(filters);
     } catch (err) {
       setError("Failed to delete application");
     }
@@ -104,7 +123,7 @@ export default function ApplicationsPage() {
 
       setFormData(initialForm);
       setEditingId(null);
-      loadApplications();
+      loadApplications(filters);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to save application");
     }
@@ -118,6 +137,65 @@ export default function ApplicationsPage() {
   return (
     <div>
       <h1>Applications</h1>
+
+      <h2>Filters</h2>
+
+      <input
+        type="text"
+        name="search"
+        placeholder="Search company or role"
+        value={filters.search}
+        onChange={handleFilterChange}
+      />
+      <br />
+
+      <select
+        name="status"
+        value={filters.status}
+        onChange={handleFilterChange}
+      >
+        <option value="">All statuses</option>
+        <option value="Wishlist">Wishlist</option>
+        <option value="Applied">Applied</option>
+        <option value="HR Interview">HR Interview</option>
+        <option value="Technical Interview">Technical Interview</option>
+        <option value="Test Task">Test Task</option>
+        <option value="Final Interview">Final Interview</option>
+        <option value="Offer">Offer</option>
+        <option value="Rejected">Rejected</option>
+      </select>
+      <br />
+
+      <select
+        name="priority"
+        value={filters.priority}
+        onChange={handleFilterChange}
+      >
+        <option value="">All priorities</option>
+        <option value="Low">Low</option>
+        <option value="Medium">Medium</option>
+        <option value="High">High</option>
+      </select>
+      <br />
+
+      <select
+        name="sortBy"
+        value={filters.sortBy}
+        onChange={handleFilterChange}
+      >
+        <option value="createdAt">Created at</option>
+        <option value="appliedDate">Applied date</option>
+        <option value="nextStepDate">Next step date</option>
+        <option value="companyName">Company name</option>
+      </select>
+      <br />
+
+      <select name="order" value={filters.order} onChange={handleFilterChange}>
+        <option value="desc">Descending</option>
+        <option value="asc">Ascending</option>
+      </select>
+
+      <hr />
 
       <form onSubmit={handleSubmit}>
         <input
