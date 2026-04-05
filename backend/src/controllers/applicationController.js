@@ -1,4 +1,5 @@
 import prisma from "../config/prisma.js";
+import logActivity from "../utils/logActivity.js";
 
 export const createApplication = async (req, res) => {
   try {
@@ -37,6 +38,13 @@ export const createApplication = async (req, res) => {
         nextStepDate: nextStepDate ? new Date(nextStepDate) : null,
         userId: req.user.id,
       },
+    });
+
+    await logActivity({
+      userId: req.user.id,
+      applicationId: application.id,
+      action: "APPLICATION_CREATED",
+      details: `${application.companyName} - ${application.positionTitle}`,
     });
 
     res.status(201).json(application);
@@ -174,6 +182,18 @@ export const updateApplication = async (req, res) => {
       },
     });
 
+    const statusChanged =
+      existingApplication.status !== updatedApplication.status;
+
+    await logActivity({
+      userId: req.user.id,
+      applicationId: updatedApplication.id,
+      action: statusChanged ? "STATUS_CHANGED" : "APPLICATION_UPDATED",
+      details: statusChanged
+        ? `${updatedApplication.companyName}: ${existingApplication.status} -> ${updatedApplication.status}`
+        : `${updatedApplication.companyName} - ${updatedApplication.positionTitle}`,
+    });
+
     res.status(200).json(updatedApplication);
   } catch (error) {
     console.error("Update application error:", error);
@@ -195,6 +215,13 @@ export const deleteApplication = async (req, res) => {
     if (!existingApplication) {
       return res.status(404).json({ message: "Application not found" });
     }
+
+    await logActivity({
+      userId: req.user.id,
+      applicationId: existingApplication.id,
+      action: "APPLICATION_DELETED",
+      details: `${existingApplication.companyName} - ${existingApplication.positionTitle}`,
+    });
 
     await prisma.jobApplication.delete({
       where: {

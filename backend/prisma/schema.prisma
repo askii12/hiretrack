@@ -13,25 +13,38 @@ model User {
   email        String           @unique
   password     String
   applications JobApplication[]
+  activityLogs ActivityLog[]
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 }
 
 model JobApplication {
-  id            String   @id @default(uuid())
+  id            String        @id @default(uuid())
   companyName   String
   positionTitle String
-  status        String   @default("Wishlist")
+  status        String        @default("Wishlist")
   location      String?
   salaryMin     Int?
   salaryMax     Int?
   jobLink       String?
-  notes         String?  @db.Text
-  priority      String   @default("Medium")
+  notes         String?       @db.Text
+  priority      String        @default("Medium")
   appliedDate   DateTime?
   nextStepDate  DateTime?
   userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activityLogs  ActivityLog[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model ActivityLog {
+  id             String         @id @default(uuid())
+  action         String
+  details        String?        @db.Text
+  userId         String
+  applicationId  String?
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application    JobApplication? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime       @default(now())
 }
