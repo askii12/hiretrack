@@ -7,6 +7,16 @@ import {
   deleteApplication,
 } from "../services/applicationService";
 
+const statuses = [
+  "Wishlist",
+  "Applied",
+  "HR Interview",
+  "Technical Interview",
+  "Test Task",
+  "Final Interview",
+  "Offer",
+  "Rejected",
+];
 const initialForm = {
   companyName: "",
   positionTitle: "",
@@ -133,7 +143,12 @@ export default function ApplicationsPage() {
     setEditingId(null);
     setFormData(initialForm);
   };
-
+  const groupedApplications = statuses.reduce((acc, status) => {
+    acc[status] = applications.filter(
+      (application) => application.status === status,
+    );
+    return acc;
+  }, {});
   return (
     <div>
       <h1>Applications</h1>
@@ -329,6 +344,47 @@ export default function ApplicationsPage() {
           </li>
         ))}
       </ul>
+      <hr />
+
+      <h2>Kanban Board</h2>
+
+      <div style={{ display: "flex", gap: "16px", overflowX: "auto" }}>
+        {statuses.map((status) => (
+          <div
+            key={status}
+            style={{
+              minWidth: "220px",
+              border: "1px solid #ccc",
+              padding: "12px",
+              borderRadius: "8px",
+            }}
+          >
+            <h3>{status}</h3>
+
+            {groupedApplications[status].length === 0 ? (
+              <p>No applications</p>
+            ) : (
+              groupedApplications[status].map((application) => (
+                <div
+                  key={application.id}
+                  style={{
+                    border: "1px solid #ddd",
+                    padding: "8px",
+                    marginBottom: "8px",
+                    borderRadius: "6px",
+                  }}
+                >
+                  <strong>{application.companyName}</strong>
+                  <br />
+                  {application.positionTitle}
+                  <br />
+                  Priority: {application.priority}
+                </div>
+              ))
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

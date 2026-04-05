@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { getMe } from "../services/authService";
 import { getApplicationStats } from "../services/applicationService";
+import { getActivityLogs } from "../services/activityService";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [stats, setStats] = useState(null);
+  const [activityLogs, setActivityLogs] = useState([]);
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -23,6 +25,9 @@ export default function DashboardPage() {
 
         const statsData = await getApplicationStats();
         setStats(statsData);
+
+        const logsData = await getActivityLogs();
+        setActivityLogs(logsData);
       } catch (err) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
@@ -75,6 +80,16 @@ export default function DashboardPage() {
           </ul>
         </div>
       )}
+
+      <h2>Recent activity</h2>
+      <ul>
+        {activityLogs.map((log) => (
+          <li key={log.id}>
+            <strong>{log.action}</strong>
+            {log.details ? ` — ${log.details}` : ""}
+          </li>
+        ))}
+      </ul>
 
       <Link to="/applications">Go to applications</Link>
       <br />
