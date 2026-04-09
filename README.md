@@ -116,7 +116,7 @@ hiretrack/
 
 ### Dashboard
 
-![Dashboard](./screenshots/dashboard.jpeg)
+![Dashboard](./screenshots/dashboard.jpg)
 
 ### Applications
 
