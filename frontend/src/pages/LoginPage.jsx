@@ -1,69 +1,34 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { login } from "../services/authService";
+import { Link } from "react-router-dom";
+import Button from "../components/Button";
 
-export default function LoginPage() {
-  const navigate = useNavigate();
-
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
-  const [error, setError] = useState("");
-
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    try {
-      const data = await login(formData);
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      navigate("/dashboard");
-    } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
-    }
-  };
-
+export default function HomePage() {
   return (
-    <div>
-      <h1>Login</h1>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+      <div className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 py-16">
+        <div className="max-w-3xl">
+          <span className="inline-flex rounded-full bg-sky-100 px-3 py-1 text-sm font-medium text-sky-700 ring-1 ring-inset ring-sky-200">
+            HireTrack
+          </span>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-        <br />
+          <h1 className="mt-6 text-5xl font-bold tracking-tight text-slate-900">
+            Track your job search like a modern CRM.
+          </h1>
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-        />
-        <br />
+          <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
+            Organize applications, monitor progress, manage interview stages,
+            and keep your job hunt in one clean dashboard.
+          </p>
 
-        <button type="submit">Login</button>
-      </form>
-
-      {error && <p>{error}</p>}
-
-      <p>
-        Don’t have an account? <Link to="/register">Register</Link>
-      </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link to="/register">
+              <Button>Create account</Button>
+            </Link>
+            <Link to="/login">
+              <Button variant="secondary">Login</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

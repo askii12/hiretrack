@@ -1,16 +1,13 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { register } from "../services/authService";
+import { login } from "../services/authService";
+import Button from "../components/Button";
+import Input from "../components/Input";
+import Card from "../components/Card";
 
-export default function RegisterPage() {
+export default function LoginPage() {
   const navigate = useNavigate();
-
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
-
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
@@ -25,55 +22,59 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      const data = await register(formData);
+      const data = await login(formData);
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
       navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
+      setError(err.response?.data?.message || "Login failed");
     }
   };
 
   return (
-    <div>
-      <h1>Register</h1>
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+      <Card className="w-full max-w-md p-8">
+        <h1 className="text-2xl font-bold text-slate-900">Welcome back</h1>
+        <p className="mt-2 text-sm text-slate-600">
+          Sign in to continue managing your applications.
+        </p>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={formData.name}
-          onChange={handleChange}
-        />
-        <br />
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          <Input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+          />
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-        <br />
+          <Input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+          />
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-        />
-        <br />
+          {error ? (
+            <p className="text-sm font-medium text-rose-600">{error}</p>
+          ) : null}
 
-        <button type="submit">Create account</button>
-      </form>
+          <Button type="submit" className="w-full">
+            Login
+          </Button>
+        </form>
 
-      {error && <p>{error}</p>}
-
-      <p>
-        Already have an account? <Link to="/login">Login</Link>
-      </p>
+        <p className="mt-6 text-sm text-slate-600">
+          Don’t have an account?{" "}
+          <Link
+            to="/register"
+            className="font-medium text-sky-600 hover:text-sky-700"
+          >
+            Register
+          </Link>
+        </p>
+      </Card>
     </div>
   );
 }
